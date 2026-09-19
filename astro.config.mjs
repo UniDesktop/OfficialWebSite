@@ -6,8 +6,12 @@ import starlight from '@astrojs/starlight';
 export default defineConfig({
 	integrations: [
 		starlight({
-			title: 'My Docs',
-			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/withastro/starlight' }],
+			title: 'United Desktop Association',
+			favicon: '/public/favicon.png',
+			logo: {
+				src: './src/assets/houston.webp',
+			},
+			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/UniDesktop' }],
 			sidebar: [
 				{
 					label: 'Guides',
@@ -21,6 +25,17 @@ export default defineConfig({
 					items: [{ autogenerate: { directory: 'reference' } }],
 				},
 			],
+			defaultLocale: 'zh-cn',
+			locales: {
+				en: {
+					label: 'English',
+					lang: 'en-US',
+				},
+				'zh-cn': {
+					label: '简体中文',
+					lang: 'zh-CN',
+				},
+		},
 		}),
 	],
 });
