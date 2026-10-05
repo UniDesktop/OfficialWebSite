@@ -2,10 +2,14 @@
 /* HERO 变体 C · 一行代码，两条后端路径
  *
  * 同一次调用，切换语言只换写法，下方两条通道显示两个平台各自实际走的路径。
- * 三种语言的写法都逐字取自仓库文档，不是编的：
- *   Rust   getting-started/installation.md、guides/appearance.md
- *   Python guides/wallpaper.md、首页原有示例
- *   Node   reference/nodejs-sdk.md（主题是 getter `uda.theme`，不是方法）
+ * 三种语言的写法只取文档里真实出现过的形式：
+ *   Rust   guides/appearance.md:32 — uda_platform_linux::LinuxAppearanceManager
+ *                                    ::new().detect_theme()?
+ *   Python reference/python-sdk.md:38 — 主题是*属性* `uda.theme`，不是方法；
+ *                                       with Uda() 用法取自 guides/wallpaper.md
+ *   Node   reference/nodejs-sdk.md:45,126 — `uda.theme` 同样是 getter
+ *
+ * 不要再写 `uda.detect_theme()` —— Python 与 Node 绑定都没有这个方法。
  */
 interface Props { repo: string }
 const { repo } = Astro.props;
@@ -15,22 +19,30 @@ const snippets = [
     key: 'rust',
     name: 'Rust',
     lines: [
-      'use uda_core::appearance::AppearanceManager;',
-      'use uda_platform_linux::appearance::LinuxAppearanceManager;',
-      '',
-      'let theme = LinuxAppearanceManager::new()',
+      'let theme = uda_platform_linux::LinuxAppearanceManager',
+      '    ::new()',
       '    .detect_theme()?;',
     ],
   },
   {
     key: 'python',
     name: 'Python',
-    lines: ['from uda import Uda', '', 'with Uda() as uda:', '    theme = uda.detect_theme()'],
+    lines: [
+      'from uda import Uda',
+      '',
+      'with Uda() as uda:',
+      "    print(uda.theme)   # 'dark' / 'light' / 'unknown'",
+    ],
   },
   {
     key: 'node',
     name: 'Node.js',
-    lines: ["const { Uda } = require('./uda');", '', 'const uda = new Uda();', 'console.log(uda.theme);   // getter'],
+    lines: [
+      "const { Uda } = require('./uda');",
+      '',
+      'const uda = new Uda();',
+      'console.log(uda.theme);   // getter',
+    ],
   },
 ] as const;
 

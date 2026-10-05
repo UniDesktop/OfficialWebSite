@@ -21,11 +21,12 @@ const status = {
 const abilities = ['主题检测', '强调色', '壁纸', '通知', '防休眠锁', '系统托盘', '媒体播控', '会话锁屏'] as const;
 
 // f = 已验证, p = 尽力而为, n = 平台无此概念 — 与矩阵逐格对齐。
+// 每行的第 8 项都是会话锁屏；Hyprland 列在矩阵里是 ⚠️❌✅⚠️⚠️✅✅✅。
 const platforms = [
   { key: 'windows', name: 'Windows 10 / 11', levels: 'ffffffff' },
   { key: 'gnome', name: 'GNOME 42+', levels: 'ffffffff' },
   { key: 'kde', name: 'KDE Plasma 5 / 6', levels: 'fpffffff' },
-  { key: 'hyprland', name: 'Hyprland / Sway', levels: 'pnpffppp' },
+  { key: 'hyprland', name: 'Hyprland / Sway', levels: 'pnfppfff' },
 ] as const;
 
 const expand = (levels: string) =>

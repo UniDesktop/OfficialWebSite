@@ -1,191 +1,24 @@
 ---
-/* HERO 变体 B · capability 探测器
- *
- * 右侧换成一块模拟 capabilities() 响应的面板：切换平台，八项能力的可用性
- * 实时变化。数据逐格取自 docs/reference/platform-support.md 的矩阵，未做任何
- * 演绎。
- *
- * 刻意不写 SupportLevel 的枚举名：上游 index.mdx 写的是 Full / Restricted /
- * Unsupported，而 platform-support.md 的 Rust 示例写的是 Full / Partial / None，
- * 两处不一致。这里沿用矩阵自己的符号与图例，不替上游选一个可能错的。
- */
 interface Props { repo: string }
 const { repo } = Astro.props;
-
-const status = {
-  full: { glyph: '✓', label: '已验证', tone: 'full' },
-  partial: { glyph: '◐', label: '尽力而为', tone: 'partial' },
-  none: { glyph: '✕', label: '无此概念', tone: 'none' },
-} as const;
-
-const abilities = ['主题检测', '强调色', '壁纸', '通知', '防休眠锁', '系统托盘', '媒体播控', '会话锁屏'] as const;
-
-// f = 已验证, p = 尽力而为, n = 平台无此概念 — 与矩阵逐格对齐。
-const platforms = [
-  { key: 'windows', name: 'Windows 10 / 11', levels: 'ffffffff' },
-  { key: 'gnome', name: 'GNOME 42+', levels: 'ffffffff' },
-  { key: 'kde', name: 'KDE Plasma 5 / 6', levels: 'fpffffff' },
-  { key: 'hyprland', name: 'Hyprland / Sway', levels: 'pnpffppp' },
-] as const;
-
-const expand = (levels: string) =>
-  levels.split('').map((c) => (c === 'f' ? 'full' : c === 'p' ? 'partial' : 'none') as keyof typeof status);
 ---
 <section class="hero container" aria-labelledby="hero-title">
   <div class="hero-copy">
     <a class="project-label" href={repo} target="_blank" rel="noreferrer">开源的跨平台桌面集成 SDK <span aria-hidden="true">↗</span></a>
-    <h1 id="hero-title">先探测能力，<br /><span>再调用接口。</span></h1>
-    <p class="hero-description">八项桌面能力在不同平台上的可用性差别很大。<br />UDA 让应用在调用之前先问清楚，而不是调完再猜。</p>
-    <div class="hero-actions"><a class="button" href="/zh-cn/reference/platform-support/">查看完整矩阵 <span aria-hidden="true">→</span></a><a class="button button-outline" href={repo} target="_blank" rel="noreferrer"><span class="code-mark" aria-hidden="true">&lt;/&gt;</span> 探索源代码</a></div>
+    <h1 id="hero-title">统一桌面接口，<br /><span>专注应用本身。</span></h1>
+    <p class="hero-description">一套 Rust API，连接 Windows 与 Linux。<br />让主题、壁纸、通知与唤醒能力更容易接入。</p>
+    <div class="hero-actions"><a class="button" href="/zh-cn/getting-started/installation/">开始构建 <span aria-hidden="true">→</span></a><a class="button button-outline" href={repo} target="_blank" rel="noreferrer"><span class="code-mark" aria-hidden="true">&lt;/&gt;</span> 探索源代码</a></div>
   </div>
-
-  <figure class="architecture probe" aria-label="能力探测面板：切换平台查看各项能力的可用性">
-    <div class="probe-head">
-      <span>capabilities()</span>
-      <span class="probe-legend"><b class="full">✓</b> 已验证 <b class="partial">◐</b> 尽力而为 <b class="none">✕</b> 无此概念</span>
+  <figure class="architecture" aria-label="架构示意：桌面应用通过 UniDesktop API 连接 Windows 和 Linux 桌面环境">
+    <div class="diagram-top"><span>你的应用</span><span>跨语言接入</span></div>
+    <div class="app-languages"><span>Rust</span><span>Python</span><span>Node.js</span><span>C / C++</span></div>
+    <svg class="connector connector-top" viewBox="0 0 400 48" preserveAspectRatio="none" aria-hidden="true"><path class="trace trace-feeds" pathLength="100" d="M50 0V12Q50 24 62 24H338Q350 24 350 12V0" /><path class="trace trace-inner" pathLength="100" d="M150 0V24M250 0V24" /><path class="trace trace-stem" pathLength="100" d="M200 24V48" /><circle cx="200" cy="24" r="3" /></svg>
+    <div class="api-node">
+      <div class="api-identity"><img src="/unidesktop-logo.png" width="76" height="64" alt="" /><div><strong>UniDesktop API</strong><span>一个接口，连接不同桌面。</span></div></div>
+      <div class="api-contract"><span>Rust crates</span><span>C ABI</span><span>统一能力契约</span></div>
     </div>
-
-    <div class="probe-tabs" role="group" aria-label="选择平台">
-      {platforms.map((p, i) => (
-        <button type="button" class="probe-tab" data-platform={p.key} aria-pressed={i === 0 ? 'true' : 'false'}>{p.name}</button>
-      ))}
-    </div>
-
-    <div class="probe-body">
-      {platforms.map((p, i) => (
-        <ul class="probe-list" data-list={p.key} hidden={i !== 0}>
-          {abilities.map((ability, j) => {
-            const key = expand(p.levels)[j];
-            return (
-              <li class="probe-row">
-                <span class="probe-name">{ability}</span>
-                <span class={`probe-status ${status[key].tone}`}><b aria-hidden="true">{status[key].glyph}</b>{status[key].label}</span>
-              </li>
-            );
-          })}
-        </ul>
-      ))}
-    </div>
-
-    <figcaption><span aria-hidden="true">↳</span> 上表是静态提示；运行时的真实答案始终由 <code>capabilities()</code> 获得。</figcaption>
+    <svg class="connector connector-bottom" viewBox="0 0 400 48" preserveAspectRatio="none" aria-hidden="true"><path class="trace trace-out" pathLength="100" d="M200 0V24" /><path class="trace trace-split" pathLength="100" d="M100 48V36Q100 24 112 24H288Q300 24 300 36V48" /><circle cx="200" cy="24" r="3" /></svg>
+    <div class="desktop-nodes"><div><strong>Windows</strong><small>Win32 / WinRT</small></div><div><strong>Linux</strong><small>Portal / D-Bus / CLI</small></div></div>
+    <figcaption><span aria-hidden="true">↳</span> 按运行环境，选择可用的原生后端。</figcaption>
   </figure>
 </section>
-
-<style is:global>
-  .probe { padding: 0; overflow: clip; }
-  .probe-head {
-    display: flex; align-items: center; justify-content: space-between; gap: 16px;
-    padding: 18px 24px; border-bottom: var(--rule);
-    font-family: var(--font-mono); font-size: 12px; color: var(--color-ink);
-  }
-  .probe-legend { font-family: var(--font-body); font-size: 10px; color: var(--color-muted); white-space: nowrap; }
-  .probe-legend b { font-weight: 600; }
-  .probe-legend b.full { color: var(--color-success); }
-  .probe-legend b.partial { color: var(--color-accent); }
-  .probe-legend b.none { color: var(--color-muted); }
-
-  .probe-tabs { display: flex; flex-wrap: wrap; gap: 6px; padding: 16px 24px 0; }
-  .probe-tab {
-    padding: 6px 12px; border: var(--rule); border-radius: var(--radius-xs);
-    background: var(--color-surface); color: var(--color-body);
-    font-family: var(--font-mono); font-size: 11px; white-space: nowrap;
-    transition: border-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
-  }
-  .probe-tab[aria-pressed='true'] { border-color: var(--color-accent); color: var(--color-accent); background: var(--color-tint); }
-  @media (hover: hover) { .probe-tab:hover { border-color: var(--color-accent); color: var(--color-accent); } }
-
-  .probe-body { padding: 14px 24px 4px; }
-  .probe-list { margin: 0; padding: 0; list-style: none; }
-  .probe-row {
-    display: flex; align-items: center; justify-content: space-between; gap: 16px;
-    padding: 7px 0; border-top: var(--rule); font-size: 12px;
-  }
-  .probe-row:first-child { border-top: 0; }
-  .probe-name { color: var(--color-ink); }
-  .probe-status { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: var(--color-muted); white-space: nowrap; }
-  .probe-status b { font-weight: 600; font-size: 12px; }
-  .probe-status.full b { color: var(--color-success); }
-  .probe-status.partial b { color: var(--color-accent); }
-  .probe-status.none b { color: var(--color-muted); }
-
-  /* The legend is a nowrap run of glyph + label; beside the title it exceeds the
-   * panel below ~640px and gets clipped, so it stacks under the title instead. */
-  @media (max-width: 640px) {
-    .probe-head { flex-direction: column; align-items: flex-start; gap: 6px; }
-    .probe-legend { white-space: normal; line-height: 1.9; }
-    .probe-tabs, .probe-body { padding-inline: 18px; }
-    .probe-tab { font-size: 10px; padding: 5px 9px; }
-  }
-
-  /* The panel resolves row by row when it first appears or the platform changes.
-   * One shot, never a loop, and guarded so reduced motion cannot hide a row. */
-  @media (prefers-reduced-motion: no-preference) {
-    .probe-list[data-resolving] .probe-row {
-      opacity: 0;
-      animation: probe-row-in var(--dur-short) var(--ease-out) forwards;
-    }
-    .probe-list[data-resolving] .probe-row:nth-child(2) { animation-delay: 35ms; }
-    .probe-list[data-resolving] .probe-row:nth-child(3) { animation-delay: 70ms; }
-    .probe-list[data-resolving] .probe-row:nth-child(4) { animation-delay: 105ms; }
-    .probe-list[data-resolving] .probe-row:nth-child(5) { animation-delay: 140ms; }
-    .probe-list[data-resolving] .probe-row:nth-child(6) { animation-delay: 175ms; }
-    .probe-list[data-resolving] .probe-row:nth-child(7) { animation-delay: 210ms; }
-    .probe-list[data-resolving] .probe-row:nth-child(8) { animation-delay: 245ms; }
-
-    .motion-arch .probe-head,
-    .motion-arch .probe-tabs { opacity: 0; animation: probe-fade var(--dur-short) var(--ease-out) forwards; }
-    .motion-arch .probe-tabs { animation-delay: 80ms; }
-  }
-  @keyframes probe-row-in {
-    from { opacity: 0; transform: translateY(3px); }
-    to { opacity: 1; transform: none; }
-  }
-  @keyframes probe-fade { from { opacity: 0; } to { opacity: 1; } }
-</style>
-
-<script>
-  const probeTabs = [...document.querySelectorAll<HTMLButtonElement>('.probe-tab')];
-  const probeLists = [...document.querySelectorAll<HTMLElement>('.probe-list')];
-  const calm = window.matchMedia('(prefers-reduced-motion: reduce)');
-  let probeTimer: ReturnType<typeof setTimeout> | undefined;
-
-  function resolve(key: string) {
-    probeTabs.forEach((tab) => tab.setAttribute('aria-pressed', String(tab.dataset.platform === key)));
-    clearTimeout(probeTimer);
-    probeLists.forEach((list) => {
-      const active = list.dataset.list === key;
-      if (active && list.hidden) {
-        list.hidden = false;
-        if (!calm.matches) {
-          list.dataset.resolving = '';
-          probeTimer = setTimeout(() => delete list.dataset.resolving, 700);
-        }
-      } else if (!active) {
-        list.hidden = true;
-        delete list.dataset.resolving;
-      }
-    });
-  }
-
-  // Resolve the first panel once, so the hero reads as a live probe.
-  if (probeLists.length && !calm.matches) {
-    const first = probeLists.find((l) => !l.hidden);
-    if (first) {
-      first.dataset.resolving = '';
-      probeTimer = setTimeout(() => delete first.dataset.resolving, 700);
-    }
-  }
-
-  probeTabs.forEach((tab, index) => {
-    tab.addEventListener('click', () => resolve(tab.dataset.platform!));
-    tab.addEventListener('keydown', (event) => {
-      let next = index;
-      if (event.key === 'ArrowRight' || event.key === 'ArrowDown') next = (index + 1) % probeTabs.length;
-      else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') next = (index - 1 + probeTabs.length) % probeTabs.length;
-      else return;
-      event.preventDefault();
-      resolve(probeTabs[next].dataset.platform!);
-      probeTabs[next].focus();
-    });
-  });
-</script>
