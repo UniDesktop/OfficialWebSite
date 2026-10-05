@@ -16,6 +16,30 @@ npm run hero:diff              # 当前 HERO 与 00-baseline 的差异
 
 也可以不用 npm，直接 `node scripts/hero.mjs list` 等。
 
+## 现有四款
+
+| 名字 | 主标题 | 右侧是什么 | 亮点 |
+|---|---|---|---|
+| `00-baseline` | 统一桌面接口，专注应用本身。 | 静态架构图 + 信号传播动画 | 原版，最稳 |
+| `a-interactive-architecture` | 两个桌面，一套代码。 | 架构图 + 可切换平台，展开该平台真实后端链 | 图表能"摸" |
+| `b-capability-probe` | 先探测能力，再调用接口。 | `capabilities()` 探测面板，4 个平台可切，8 项能力实时变化 | 把 `capabilities()` 做成首屏能玩的东西 |
+| `c-one-call-two-paths` | 同一次调用，两条原生路径。 | 一行代码切语言 + 分叉出两个平台的后端路径 | 统一接口最直白 |
+
+```sh
+npm run hero:restore -- b-capability-probe    # 换成 B
+npm run hero:restore -- 00-baseline           # 换回原版
+```
+
+三款变体各自把样式写在组件的 `<style is:global>` 里，**换版本不会留下孤儿 CSS**。
+
+**所有文案与数据都不是编的**：平台后端链取自 `docs/internals/protocols/`，能力矩阵逐格取自
+`docs/reference/platform-support.md`，三种语言的 API 写法取自 `docs/getting-started/`、
+`docs/guides/wallpaper.md`、`docs/reference/nodejs-sdk.md`。
+
+关于 `SupportLevel`：上游 `index.mdx` 写的是 `Full / Restricted / Unsupported`，
+而 `platform-support.md` 的 Rust 示例写的是 `Full / Partial / None`，两处不一致，
+所以变体 B **刻意不写枚举名**，只用矩阵自己的符号与图例。
+
 ## 重要约定
 
 - **`00-baseline.astro` 是冻结的还原点，不要改它。** 想基于它做新变体，先 `hero:restore`，改完再 `hero:save -- 新名字`。

@@ -1,0 +1,193 @@
+---
+/* HERO 变体 C · 一行代码，两条后端路径
+ *
+ * 同一次调用，切换语言只换写法，下方两条通道显示两个平台各自实际走的路径。
+ * 三种语言的写法都逐字取自仓库文档，不是编的：
+ *   Rust   getting-started/installation.md、guides/appearance.md
+ *   Python guides/wallpaper.md、首页原有示例
+ *   Node   reference/nodejs-sdk.md（主题是 getter `uda.theme`，不是方法）
+ */
+interface Props { repo: string }
+const { repo } = Astro.props;
+
+const snippets = [
+  {
+    key: 'rust',
+    name: 'Rust',
+    lines: [
+      'use uda_core::appearance::AppearanceManager;',
+      'use uda_platform_linux::appearance::LinuxAppearanceManager;',
+      '',
+      'let theme = LinuxAppearanceManager::new()',
+      '    .detect_theme()?;',
+    ],
+  },
+  {
+    key: 'python',
+    name: 'Python',
+    lines: ['from uda import Uda', '', 'with Uda() as uda:', '    theme = uda.detect_theme()'],
+  },
+  {
+    key: 'node',
+    name: 'Node.js',
+    lines: ["const { Uda } = require('./uda');", '', 'const uda = new Uda();', 'console.log(uda.theme);   // getter'],
+  },
+] as const;
+
+const lanes = [
+  {
+    key: 'windows',
+    name: 'Windows',
+    steps: ['Win32 / WinRT', '注册表 · WinRT 原生接口'],
+    note: '无回退层，直接命中',
+  },
+  {
+    key: 'linux',
+    name: 'Linux',
+    steps: ['XDG Portal', '原生 IPC · gsettings / plasmashell', 'CLI 工具', 'UdaError::Unsupported'],
+    note: '逐级回退，直到某层应答',
+  },
+] as const;
+---
+<section class="hero container" aria-labelledby="hero-title">
+  <div class="hero-copy">
+    <a class="project-label" href={repo} target="_blank" rel="noreferrer">开源的跨平台桌面集成 SDK <span aria-hidden="true">↗</span></a>
+    <h1 id="hero-title">同一次调用，<br /><span>两条原生路径。</span></h1>
+    <p class="hero-description">切语言只换写法，不换语义。<br />下面两条通道，是两个平台各自真实走过的后端。</p>
+    <div class="hero-actions"><a class="button" href="/zh-cn/getting-started/installation/">开始构建 <span aria-hidden="true">→</span></a><a class="button button-outline" href={repo} target="_blank" rel="noreferrer"><span class="code-mark" aria-hidden="true">&lt;/&gt;</span> 探索源代码</a></div>
+  </div>
+
+  <figure class="architecture lanes" aria-label="同一次调用在 Windows 与 Linux 上各自经过的后端路径">
+    <div class="lane-tabs" role="tablist" aria-label="选择语言">
+      {snippets.map((s, i) => (
+        <button type="button" role="tab" class="lane-tab" id={`lane-tab-${s.key}`} aria-controls={`lane-panel-${s.key}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} data-lang={s.key}>{s.name}</button>
+      ))}
+    </div>
+
+    {snippets.map((s, i) => (
+      <pre class="lane-code" id={`lane-panel-${s.key}`} role="tabpanel" aria-labelledby={`lane-tab-${s.key}`} tabindex="0" hidden={i !== 0}><code>{s.lines.map((line) => <span class="lane-line">{line || '\u00a0'}</span>)}</code></pre>
+    ))}
+
+    <div class="lane-split" aria-hidden="true">
+      <svg viewBox="0 0 400 40" preserveAspectRatio="none"><path class="lane-path" pathLength="100" d="M200 0V14M200 14H100Q88 14 88 26V40M200 14H300Q312 14 312 26V40" /><circle cx="200" cy="14" r="3" /></svg>
+    </div>
+
+    <div class="lane-grid">
+      {lanes.map((lane) => (
+        <div class="lane">
+          <strong>{lane.name}</strong>
+          <ol class="lane-steps">
+            {lane.steps.map((step, i) => (
+              <li class={i === 0 ? 'is-first' : i === lane.steps.length - 1 && lane.key === 'linux' ? 'is-terminal' : ''}>{step}</li>
+            ))}
+          </ol>
+          <small>{lane.note}</small>
+        </div>
+      ))}
+    </div>
+
+    <figcaption><span aria-hidden="true">↳</span> 调用前用 <code>capabilities()</code> 判断，不要假定每一层都在。</figcaption>
+  </figure>
+</section>
+
+<style is:global>
+  .lanes { padding: 24px; }
+  .lane-tabs { display: flex; gap: 4px; margin-bottom: 14px; }
+  .lane-tab {
+    padding: 6px 13px; border: 1px solid var(--color-transparent); border-radius: 5px;
+    background: var(--color-transparent); color: var(--color-muted);
+    font-family: var(--font-mono); font-size: 11px; white-space: nowrap;
+    transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+  }
+  .lane-tab[aria-selected='true'] { background: var(--color-tint); color: var(--color-accent); }
+  @media (hover: hover) { .lane-tab:hover { color: var(--color-accent); } }
+
+  .lane-code {
+    margin: 0; padding: 14px 16px; border: var(--rule); border-radius: var(--radius-sm);
+    background: var(--color-code-surface); color: var(--color-code-text);
+    font-family: var(--font-mono); font-size: 11px; line-height: 1.9; overflow-x: auto;
+  }
+  .lane-line { display: block; white-space: pre; }
+
+  .lane-split { margin: 4px 0 0; }
+  .lane-split svg { display: block; width: 100%; height: 40px; overflow: visible; }
+  .lane-path { fill: none; stroke: var(--color-connector); stroke-width: 1; vector-effect: non-scaling-stroke; }
+  .lane-split circle { fill: var(--color-accent); stroke: var(--color-surface); stroke-width: 2; }
+
+  .lane-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .lane {
+    padding: 14px; border: var(--rule); border-radius: var(--radius-sm);
+    background: var(--color-surface);
+  }
+  .lane > strong { display: block; font-family: var(--font-display); font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+  .lane-steps { margin: 0; padding: 0; list-style: none; font-family: var(--font-mono); font-size: 10px; line-height: 1.7; }
+  .lane-steps li { position: relative; padding-left: 14px; color: var(--color-body); }
+  .lane-steps li::before { content: '↓'; position: absolute; left: 0; color: var(--color-muted); }
+  .lane-steps li.is-first { color: var(--color-accent); }
+  .lane-steps li.is-first::before { content: '▸'; }
+  .lane-steps li.is-terminal { color: var(--color-muted); }
+  .lane > small { display: block; margin-top: 10px; font-size: 10px; color: var(--color-muted); }
+
+  /* Motion: the code line settles, the split draws, then both lanes resolve
+   * together — one shot, and it shows the same call reaching both platforms. */
+  @media (prefers-reduced-motion: no-preference) {
+    .motion-arch .lane-tabs { opacity: 0; animation: lane-fade var(--dur-short) var(--ease-out) forwards; }
+    .motion-arch .lane-code { opacity: 0; animation: lane-fade var(--dur-short) var(--ease-out) 100ms forwards; }
+    .motion-arch .lane-path {
+      stroke-dasharray: 100 100; stroke-dashoffset: 100;
+      animation: lane-draw var(--dur-long) var(--ease-out) 420ms forwards;
+    }
+    .motion-arch .lane-split circle { opacity: 0; animation: lane-fade var(--dur-micro) var(--ease-out) 400ms forwards; }
+    .motion-arch .lane { animation: lane-wake var(--dur-short) var(--ease-out) 860ms; }
+  }
+  @keyframes lane-fade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes lane-draw { to { stroke-dashoffset: 0; } }
+  @keyframes lane-wake {
+    0%, 100% { border-color: var(--color-rule); background: var(--color-surface); }
+    40% { border-color: var(--color-accent); background: var(--color-tint); }
+  }
+</style>
+
+<script>
+  const laneTabs = [...document.querySelectorAll<HTMLButtonElement>('.lane-tab')];
+  const lanePanels = laneTabs.map((tab) => document.getElementById(tab.getAttribute('aria-controls')!));
+  const still = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let laneTimer: ReturnType<typeof setTimeout> | undefined;
+
+  function selectLane(tab: HTMLButtonElement) {
+    // Selection state is immediate; only the panel body animates.
+    laneTabs.forEach((item) => {
+      const on = item === tab;
+      item.setAttribute('aria-selected', String(on));
+      item.tabIndex = on ? 0 : -1;
+    });
+    clearTimeout(laneTimer);
+    lanePanels.forEach((panel) => {
+      if (!panel) return;
+      const on = panel.id === tab.getAttribute('aria-controls');
+      if (on && panel.hidden) {
+        panel.hidden = false;
+        if (!still.matches) {
+          panel.dataset.settling = '';
+          laneTimer = setTimeout(() => delete panel.dataset.settling, 500);
+        }
+      } else if (!on) {
+        panel.hidden = true;
+        delete panel.dataset.settling;
+      }
+    });
+  }
+
+  laneTabs.forEach((tab, index) => {
+    tab.addEventListener('click', () => selectLane(tab));
+    tab.addEventListener('keydown', (event) => {
+      let next = index;
+      if (event.key === 'ArrowRight') next = (index + 1) % laneTabs.length;
+      else if (event.key === 'ArrowLeft') next = (index - 1 + laneTabs.length) % laneTabs.length;
+      else return;
+      event.preventDefault();
+      selectLane(laneTabs[next]);
+      laneTabs[next].focus();
+    });
+  });
+</script>
