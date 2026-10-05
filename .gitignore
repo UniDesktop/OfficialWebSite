@@ -17,5 +17,11 @@ pnpm-debug.log*
 .env
 .env.production
 
+# design skill working state
+.hallmark/
+
+# packaging output (built deployable bundles)
+release/
+
 # macOS-specific files
 .DS_Store
