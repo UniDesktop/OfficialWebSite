@@ -1,16 +1,16 @@
 :root {
   color-scheme: light;
-  --color-paper: #f4f6f8;
-  --color-surface: #ffffff;
-  --color-surface-raised: #ffffff;
+  --color-paper: #e7ebf0;
+  --color-surface: #f5f7fa;
+  --color-surface-raised: #fcfdfe;
   --color-ink: #1a1b1f;
   --color-body: #42474e;
-  --color-muted: #70757d;
-  --color-rule: #dfe3e8;
+  --color-muted: #5f646c;
+  --color-rule: #d5dbe3;
   --color-accent: #1565c0;
   --color-accent-hover: #0d47a1;
   --color-accent-ink: #ffffff;
-  --color-tint: #e3f2fd;
+  --color-tint: #e0ecf9;
   --color-graphite: #202124;
   --color-on-dark: #f8f9fa;
   --color-dark-muted: #bdc1c6;
@@ -24,7 +24,7 @@
   --color-code-type: #ecd0a0;
   --color-code-muted: #889bb5;
   --color-connector: #9fb7d5;
-  --color-success: #2e7d32;
+  --color-success: #256b29;
   --color-error: #c62828;
   --color-transparent: transparent;
   --font-display: 'Space Grotesk', 'Roboto', 'Noto Sans SC', 'Segoe UI', 'Microsoft YaHei', sans-serif;
