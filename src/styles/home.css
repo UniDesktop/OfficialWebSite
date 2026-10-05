@@ -463,42 +463,53 @@ code { font-family: var(--font-mono); }
  *     drops through the API contract, and both desktops light at one instant —
  *     which is the product thesis, drawn once. */
 @media (prefers-reduced-motion: no-preference) {
+  /* The card assembles top-down: caption, then hosts, then the trace travels. */
+  .motion-arch .diagram-top {
+    opacity: 0;
+    animation: motion-fade var(--dur-short) var(--ease-out) forwards;
+  }
   .motion-arch .app-languages span {
     opacity: 0;
     animation: motion-rise var(--dur-short) var(--ease-out) forwards;
   }
-  .motion-arch .app-languages span:nth-child(2) { animation-delay: 30ms; }
-  .motion-arch .app-languages span:nth-child(3) { animation-delay: 60ms; }
-  .motion-arch .app-languages span:nth-child(4) { animation-delay: 90ms; }
+  .motion-arch .app-languages span:nth-child(1) { animation-delay: 80ms; }
+  .motion-arch .app-languages span:nth-child(2) { animation-delay: 110ms; }
+  .motion-arch .app-languages span:nth-child(3) { animation-delay: 140ms; }
+  .motion-arch .app-languages span:nth-child(4) { animation-delay: 170ms; }
 
   /* pathLength="100" on each trace normalises the dash maths, so the draw runs
    * at the same rate regardless of how the non-uniform viewBox scales it. */
   .motion-arch .connector .trace {
     stroke-dasharray: 100 100;
     stroke-dashoffset: 100;
-    animation: motion-draw var(--dur-long) var(--ease-out) forwards;
+    animation: motion-draw var(--dur-short) var(--ease-out) forwards;
   }
+  /* The merge is the moment worth slowing down for. */
   .motion-arch .connector .trace-feeds,
-  .motion-arch .connector .trace-inner { animation-delay: 200ms; }
-  .motion-arch .connector .trace-stem { animation-delay: 600ms; animation-duration: var(--dur-short); }
-  .motion-arch .connector .trace-out { animation-delay: 1040ms; animation-duration: var(--dur-short); }
-  .motion-arch .connector .trace-split { animation-delay: 1260ms; animation-duration: var(--dur-short); }
+  .motion-arch .connector .trace-inner {
+    animation-duration: var(--dur-long);
+    animation-delay: 360ms;
+  }
+  .motion-arch .connector .trace-stem { animation-delay: 780ms; }
+  .motion-arch .connector .trace-out { animation-delay: 1200ms; }
+  .motion-arch .connector .trace-split { animation-delay: 1420ms; }
 
   .motion-arch .connector circle {
     opacity: 0;
     animation: motion-fade var(--dur-micro) var(--ease-out) forwards;
   }
-  .motion-arch .connector-top circle { animation-delay: 560ms; }
-  .motion-arch .connector-bottom circle { animation-delay: 1420ms; }
+  /* Each dot marks the junction the trace has just reached. */
+  .motion-arch .connector-top circle { animation-delay: 760ms; }
+  .motion-arch .connector-bottom circle { animation-delay: 1400ms; }
 
   .motion-arch .api-contract > span {
     opacity: 0;
     animation: motion-fade var(--dur-short) var(--ease-out) forwards;
-    animation-delay: 820ms;
+    animation-delay: 980ms;
   }
   .motion-arch .desktop-nodes > div {
     animation: motion-wake var(--dur-short) var(--ease-out);
-    animation-delay: 1480ms;
+    animation-delay: 1620ms;
   }
 }
 

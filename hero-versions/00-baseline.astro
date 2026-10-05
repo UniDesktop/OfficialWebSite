@@ -1,0 +1,24 @@
+---
+interface Props { repo: string }
+const { repo } = Astro.props;
+---
+<section class="hero container" aria-labelledby="hero-title">
+  <div class="hero-copy">
+    <a class="project-label" href={repo} target="_blank" rel="noreferrer">开源的跨平台桌面集成 SDK <span aria-hidden="true">↗</span></a>
+    <h1 id="hero-title">统一桌面接口，<br /><span>专注应用本身。</span></h1>
+    <p class="hero-description">一套 Rust API，连接 Windows 与 Linux。<br />让主题、壁纸、通知与唤醒能力更容易接入。</p>
+    <div class="hero-actions"><a class="button" href="/zh-cn/getting-started/installation/">开始构建 <span aria-hidden="true">→</span></a><a class="button button-outline" href={repo} target="_blank" rel="noreferrer"><span class="code-mark" aria-hidden="true">&lt;/&gt;</span> 探索源代码</a></div>
+  </div>
+  <figure class="architecture" aria-label="架构示意：桌面应用通过 UniDesktop API 连接 Windows 和 Linux 桌面环境">
+    <div class="diagram-top"><span>你的应用</span><span>跨语言接入</span></div>
+    <div class="app-languages"><span>Rust</span><span>Python</span><span>Node.js</span><span>C / C++</span></div>
+    <svg class="connector connector-top" viewBox="0 0 400 48" preserveAspectRatio="none" aria-hidden="true"><path class="trace trace-feeds" pathLength="100" d="M50 0V12Q50 24 62 24H338Q350 24 350 12V0" /><path class="trace trace-inner" pathLength="100" d="M150 0V24M250 0V24" /><path class="trace trace-stem" pathLength="100" d="M200 24V48" /><circle cx="200" cy="24" r="3" /></svg>
+    <div class="api-node">
+      <div class="api-identity"><img src="/unidesktop-logo.png" width="76" height="64" alt="" /><div><strong>UniDesktop API</strong><span>一个接口，连接不同桌面。</span></div></div>
+      <div class="api-contract"><span>Rust crates</span><span>C ABI</span><span>统一能力契约</span></div>
+    </div>
+    <svg class="connector connector-bottom" viewBox="0 0 400 48" preserveAspectRatio="none" aria-hidden="true"><path class="trace trace-out" pathLength="100" d="M200 0V24" /><path class="trace trace-split" pathLength="100" d="M100 48V36Q100 24 112 24H288Q300 24 300 36V48" /><circle cx="200" cy="24" r="3" /></svg>
+    <div class="desktop-nodes"><div><strong>Windows</strong><small>Win32 / WinRT</small></div><div><strong>Linux</strong><small>Portal / D-Bus / CLI</small></div></div>
+    <figcaption><span aria-hidden="true">↳</span> 按运行环境，选择可用的原生后端。</figcaption>
+  </figure>
+</section>

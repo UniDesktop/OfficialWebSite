@@ -7,7 +7,11 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "hero:list": "node scripts/hero.mjs list",
+    "hero:save": "node scripts/hero.mjs save",
+    "hero:restore": "node scripts/hero.mjs restore",
+    "hero:diff": "node scripts/hero.mjs diff"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.42.2",
