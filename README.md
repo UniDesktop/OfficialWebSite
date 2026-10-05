@@ -45,6 +45,22 @@ pnpm preview
 
 原有的 `/zh-cn/guides/example/`、`/zh-cn/reference/example/` 及英文同名路径已由手写页面换成正式文档，并保留为 301 重定向，配置见 `astro.config.mjs`。
 
+## 首页动效
+
+首页只有三个动效，都服务于理解产品，不服务于"看起来热闹"：
+
+1. **架构图信号传播**（首屏播放一次）——四种语言宿主汇入 API 契约，再同时打到 Windows 与 Linux。这是产品论点本身：一次调用，两个平台。
+2. **回退链探测下扫**（滚动进入视口播放一次）——高亮依次走过 `XDG Portal → 原生 IPC → CLI → Unsupported`，只标记顺序，不标记哪一层真的可用，因此不会对访客的机器做出错误陈述。
+3. **代码 Tab 交叉淡入**——原来切换是硬跳。
+
+三条硬约束，改动时不要破坏：
+
+- **默认渲染就是最终状态**。动效只在 JS 加上 `motion-arch` / `motion-cascade` / `data-*` 类之后才存在。无 JS、脚本报错、动画被拦三种情况下页面都必须完整可见。
+- **所有动效规则写在 `@media (prefers-reduced-motion: no-preference)` 里**。这一点不能省：`home.css` 顶部的减少动效块用 `!important` 关掉了全部动画，如果把 `opacity: 0` 的初始态写在守卫之外，开启减少动效的用户会永远看不到这些元素。
+- **每条动效只播放一次**，没有无限循环；只用 `transform`、`opacity` 与 `stroke-dashoffset`（描线不触发重排）；缓动只取 `--ease-out` / `--ease-in` / `--ease-in-out`。
+
+连线描线依赖每条 `<path>` 上的 `pathLength="100"`——它把虚线长度归一化，否则 `preserveAspectRatio="none"` 的非等比缩放会让描线速度忽快忽慢。拆开 SVG 路径时别丢掉这个属性。
+
 ## 发布
 
 `pnpm build` 生成 `dist/`，可上传到支持静态网站的托管服务。`astro.config.mjs` 中的生产域名为项目 README 公布的 `https://unidesktop.sr-studio.cn`。本次仅实现与本地验证，不自动发布。

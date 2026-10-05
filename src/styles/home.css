@@ -1,8 +1,10 @@
-/* Hallmark · homepage refinement: concise copy, reduced ornament, compact feature list
- * pre-emit critique: P4 H5 E4 S5 R5 V4
+/* Hallmark · homepage refinement: motion layer — architecture trace, fallback probe, tab crossfade
+ * pre-emit critique: P5 H5 E5 S5 R5 V4
  * genre: modern-minimal · macrostructure: Map / Diagram · theme: Cobalt
  * nav: N1b (real product destinations) · footer: Ft2 · enrichment: semantic HTML diagram
- * audience: desktop developers · action: SDK integration · tone: precise and open */
+ * audience: desktop developers · action: SDK integration · tone: precise and open
+ * motion: arch-trace · cascade-probe · tab-crossfade — three primitives, all one-shot,
+ *         all guarded by prefers-reduced-motion: no-preference */
 @import '../../tokens.css';
 @font-face { font-family: 'Space Grotesk'; src: url('/fonts/space-grotesk.ttf') format('truetype'); font-weight: 600; font-style: normal; font-display: swap; }
 
@@ -438,4 +440,115 @@ code { font-family: var(--font-mono); }
   .support-principle h3 { font-size: 17px; }
   .support-principle p { font-size: 13px; }
   .community p { font-size: 15px; }
+}
+
+/* ---------------------------------------------------------------------------
+ * Motion — three one-shot primitives. Nothing else on the page moves.
+ *
+ * Every rule here sits inside `prefers-reduced-motion: no-preference` on purpose.
+ * The blunt block earlier in this file switches all animation off with
+ * `!important`, so a reveal-style rule written outside this guard would leave
+ * its element stuck at `opacity: 0` for anyone who asked for less motion.
+ * Guarding with no-preference means the initial hidden state never exists for
+ * them: the default rendering is the finished diagram.
+ *
+ * The class hooks (`motion-arch`, `motion-cascade`, `data-leaving`,
+ * `data-entering`) are added by JS only when it is about to run the animation,
+ * and removed afterwards — so no-JS, a script error, or a blocked animation all
+ * fall back to the plain, fully visible page.
+ * ------------------------------------------------------------------------- */
+
+/* 1 · Hero architecture trace.
+ *     The four language hosts settle, the feeds merge into the rail, the call
+ *     drops through the API contract, and both desktops light at one instant —
+ *     which is the product thesis, drawn once. */
+@media (prefers-reduced-motion: no-preference) {
+  .motion-arch .app-languages span {
+    opacity: 0;
+    animation: motion-rise var(--dur-short) var(--ease-out) forwards;
+  }
+  .motion-arch .app-languages span:nth-child(2) { animation-delay: 30ms; }
+  .motion-arch .app-languages span:nth-child(3) { animation-delay: 60ms; }
+  .motion-arch .app-languages span:nth-child(4) { animation-delay: 90ms; }
+
+  /* pathLength="100" on each trace normalises the dash maths, so the draw runs
+   * at the same rate regardless of how the non-uniform viewBox scales it. */
+  .motion-arch .connector .trace {
+    stroke-dasharray: 100 100;
+    stroke-dashoffset: 100;
+    animation: motion-draw var(--dur-long) var(--ease-out) forwards;
+  }
+  .motion-arch .connector .trace-feeds,
+  .motion-arch .connector .trace-inner { animation-delay: 200ms; }
+  .motion-arch .connector .trace-stem { animation-delay: 600ms; animation-duration: var(--dur-short); }
+  .motion-arch .connector .trace-out { animation-delay: 1040ms; animation-duration: var(--dur-short); }
+  .motion-arch .connector .trace-split { animation-delay: 1260ms; animation-duration: var(--dur-short); }
+
+  .motion-arch .connector circle {
+    opacity: 0;
+    animation: motion-fade var(--dur-micro) var(--ease-out) forwards;
+  }
+  .motion-arch .connector-top circle { animation-delay: 560ms; }
+  .motion-arch .connector-bottom circle { animation-delay: 1420ms; }
+
+  .motion-arch .api-contract > span {
+    opacity: 0;
+    animation: motion-fade var(--dur-short) var(--ease-out) forwards;
+    animation-delay: 820ms;
+  }
+  .motion-arch .desktop-nodes > div {
+    animation: motion-wake var(--dur-short) var(--ease-out);
+    animation-delay: 1480ms;
+  }
+}
+
+/* 3 · Code tab crossfade. Outgoing fades fast on the way out, incoming settles
+ *     slower on the way in. Selection state itself is never delayed. */
+@media (prefers-reduced-motion: no-preference) {
+  [role='tabpanel'][data-leaving] {
+    opacity: 0;
+    transition: opacity var(--dur-micro) var(--ease-in);
+  }
+  [role='tabpanel'][data-entering] {
+    animation: motion-fade var(--dur-short) var(--ease-out) both;
+  }
+}
+
+/* 2 · Fallback cascade probe. A highlight walks the tiers in order and leaves
+ *     every tier at its normal weight — it marks the sequence, never which
+ *     backend actually answers on the visitor's machine. Skipped below 40rem,
+ *     where the cascade turns horizontal and the card is already short. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 40rem) {
+  .motion-cascade .cascade > span:nth-child(1),
+  .motion-cascade .cascade > span:nth-child(3),
+  .motion-cascade .cascade > span:nth-child(5),
+  .motion-cascade .cascade > code {
+    animation: motion-probe var(--dur-short) var(--ease-in-out);
+  }
+  .motion-cascade .cascade > span:nth-child(1) { animation-delay: 0ms; }
+  .motion-cascade .cascade > span:nth-child(3) { animation-delay: 130ms; }
+  .motion-cascade .cascade > span:nth-child(5) { animation-delay: 260ms; }
+  .motion-cascade .cascade > code { animation-delay: 390ms; }
+}
+
+@keyframes motion-rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes motion-draw {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes motion-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+/* 0%/100% must match the resting values from the polish pass above, otherwise
+ * the un-filled animation snaps the card back to a different colour. */
+@keyframes motion-wake {
+  0%, 100% { border-color: var(--color-rule); background: var(--color-surface); }
+  40% { border-color: var(--color-accent); background: var(--color-tint); }
+}
+@keyframes motion-probe {
+  0%, 100% { background: var(--color-transparent); }
+  45% { background: var(--color-surface); }
 }

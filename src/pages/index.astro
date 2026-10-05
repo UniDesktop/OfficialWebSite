@@ -111,12 +111,12 @@ const platforms = [
         <figure class="architecture" aria-label="架构示意：桌面应用通过 UniDesktop API 连接 Windows 和 Linux 桌面环境">
           <div class="diagram-top"><span>你的应用</span><span>跨语言接入</span></div>
           <div class="app-languages"><span>Rust</span><span>Python</span><span>Node.js</span><span>C / C++</span></div>
-          <svg class="connector connector-top" viewBox="0 0 400 48" preserveAspectRatio="none" aria-hidden="true"><path d="M50 0V12Q50 24 62 24H338Q350 24 350 12V0M150 0V24M250 0V24M200 24V48" /><circle cx="200" cy="24" r="3" /></svg>
+          <svg class="connector connector-top" viewBox="0 0 400 48" preserveAspectRatio="none" aria-hidden="true"><path class="trace trace-feeds" pathLength="100" d="M50 0V12Q50 24 62 24H338Q350 24 350 12V0" /><path class="trace trace-inner" pathLength="100" d="M150 0V24M250 0V24" /><path class="trace trace-stem" pathLength="100" d="M200 24V48" /><circle cx="200" cy="24" r="3" /></svg>
           <div class="api-node">
             <div class="api-identity"><img src="/unidesktop-logo.png" width="76" height="64" alt="" /><div><strong>UniDesktop API</strong><span>一个接口，连接不同桌面。</span></div></div>
             <div class="api-contract"><span>Rust crates</span><span>C ABI</span><span>统一能力契约</span></div>
           </div>
-          <svg class="connector connector-bottom" viewBox="0 0 400 48" preserveAspectRatio="none" aria-hidden="true"><path d="M200 0V24M100 48V36Q100 24 112 24H288Q300 24 300 36V48" /><circle cx="200" cy="24" r="3" /></svg>
+          <svg class="connector connector-bottom" viewBox="0 0 400 48" preserveAspectRatio="none" aria-hidden="true"><path class="trace trace-out" pathLength="100" d="M200 0V24" /><path class="trace trace-split" pathLength="100" d="M100 48V36Q100 24 112 24H288Q300 24 300 36V48" /><circle cx="200" cy="24" r="3" /></svg>
           <div class="desktop-nodes"><div><strong>Windows</strong><small>Win32 / WinRT</small></div><div><strong>Linux</strong><small>Portal / D-Bus / CLI</small></div></div>
           <figcaption><span aria-hidden="true">↳</span> 按运行环境，选择可用的原生后端。</figcaption>
         </figure>
@@ -177,9 +177,38 @@ const platforms = [
       const copyButton = document.querySelector<HTMLButtonElement>('.copy-button')!;
       const copyStatus = document.querySelector<HTMLElement>('#copy-status')!;
       let resetCopy: ReturnType<typeof setTimeout>;
+      let panelTimer: ReturnType<typeof setTimeout> | undefined;
+
+      /* Motion is opt-in. Every animation on this page is authored so the default
+       * rendering is the finished state; JS only adds the class that starts it.
+       * That keeps the page correct when JS fails, and — because the existing
+       * reduced-motion block switches every animation off with !important — it
+       * keeps reveal-style animations from leaving content permanently hidden. */
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+      // Swap panels with a short fade-out / fade-in rather than an instant jump.
+      function showPanel(current: HTMLElement | null, next: HTMLElement) {
+        clearTimeout(panelTimer);
+        if (!current || current === next || prefersReducedMotion.matches) {
+          if (current && current !== next) current.hidden = true;
+          next.hidden = false;
+          return;
+        }
+        current.dataset.leaving = '';
+        panelTimer = setTimeout(() => {
+          delete current.dataset.leaving;
+          current.hidden = true;
+          next.hidden = false;
+          next.dataset.entering = '';
+          panelTimer = setTimeout(() => { delete next.dataset.entering; }, 260);
+        }, 120);
+      }
+
       function selectTab(tab: HTMLButtonElement) {
-        tabs.forEach((item) => { const selected = item === tab; item.setAttribute('aria-selected', String(selected)); item.tabIndex = selected ? 0 : -1; document.getElementById(item.getAttribute('aria-controls')!)!.hidden = !selected; });
+        // Selection state is immediate; only the panel content crossfades.
+        tabs.forEach((item) => { const selected = item === tab; item.setAttribute('aria-selected', String(selected)); item.tabIndex = selected ? 0 : -1; });
         clearTimeout(resetCopy); copyButton.textContent = '复制代码'; copyStatus.textContent = '';
+        showPanel(document.querySelector<HTMLElement>('[role="tabpanel"]:not([hidden])'), document.getElementById(tab.getAttribute('aria-controls')!)!);
       }
       tabs.forEach((tab, index) => { tab.addEventListener('click', () => selectTab(tab)); tab.addEventListener('keydown', (event) => { let next = index; if (event.key === 'ArrowRight') next = (index + 1) % tabs.length; else if (event.key === 'ArrowLeft') next = (index - 1 + tabs.length) % tabs.length; else if (event.key === 'Home') next = 0; else if (event.key === 'End') next = tabs.length - 1; else return; event.preventDefault(); selectTab(tabs[next]); tabs[next].focus(); }); });
       copyButton.addEventListener('click', async () => {
@@ -188,6 +217,34 @@ const platforms = [
         catch { copyButton.textContent = '请手动复制'; copyStatus.textContent = '浏览器未允许剪贴板访问，请选中代码手动复制。'; }
         finally { copyButton.disabled = false; clearTimeout(resetCopy); resetCopy = setTimeout(() => { copyButton.textContent = '复制代码'; }, 2500); }
       });
+
+      /* Motion 1 — hero architecture trace.
+       * Plays once on load: the four language hosts feed the rail, the call
+       * descends through the API contract, and both desktops light together.
+       * The class is removed afterwards so the stylesheet returns to its plain
+       * state even if an animation never ran. */
+      const architecture = document.querySelector<HTMLElement>('.architecture');
+      if (architecture && !prefersReducedMotion.matches) {
+        architecture.classList.add('motion-arch');
+        setTimeout(() => architecture.classList.remove('motion-arch'), 2200);
+      }
+
+      /* Motion 2 — fallback cascade probe.
+       * Fires once when the principle card scrolls into view, showing the tiers
+       * being walked in order. It only marks the order, never the outcome, so it
+       * cannot misrepresent which backend answers on a given machine. */
+      const cascade = document.querySelector<HTMLElement>('.support-principle');
+      if (cascade && !prefersReducedMotion.matches && 'IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            entry.target.classList.add('motion-cascade');
+            observer.unobserve(entry.target);
+            setTimeout(() => entry.target.classList.remove('motion-cascade'), 1400);
+          }
+        }, { threshold: 0.35 });
+        observer.observe(cascade);
+      }
     </script>
   </body>
 </html>
