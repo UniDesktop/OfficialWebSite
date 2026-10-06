@@ -38,9 +38,11 @@ pnpm preview
 - `/`：中文官网首页；`src/pages/index.astro`。
 - `/zh-cn/`：中文文档入口；`/en/`：英文文档入口，两侧逐页对应。
 - 文档分四个分区，中英结构一致：`getting-started`（快速开始）、`guides`（功能指南）、`reference`（参考手册）、`internals`（内部实现）。
-- `src/content/docs/zh-cn/`、`src/content/docs/en/`：双语文档内容。
+- `src/content/docs/zh-cn/`、`src/content/docs/en/`：双语文档内容（**由同步脚本生成，不要手改**，见下）。
+- `docs-overrides/`：官网自己加的文档页，同步时覆盖进去，不会被冲掉。
 - `src/styles/home.css`：首页响应式布局与交互状态。
-- `tokens.css`：颜色、字体、间距与动效变量。标题使用本地托管的 Space Grotesk，中文回退到系统字体。
+- `src/styles/starlight-theme.css`：文档页的主题桥接，把 Starlight 的语义变量映射到同一套 Cobalt 令牌，让两侧不再像两个产品。注意 Starlight 的 `--sl-color-white/black` 命名在浅色下是**反的**（`white` 是文字色、`black` 是背景色），文件里有说明。
+- `tokens.css`：颜色、字体、间距与动效变量，首页与文档共用。标题使用本地托管的 Space Grotesk，中文回退到系统字体。
 - `public/unidesktop-logo.png`：来自 SDK 仓库的官方标志。
 
 原有的 `/zh-cn/guides/example/`、`/zh-cn/reference/example/` 及英文同名路径已由手写页面换成正式文档，并保留为 301 重定向，配置见 `astro.config.mjs`。
@@ -69,28 +71,57 @@ pnpm preview
 
 产品内容来自 [社区介绍](https://github.com/UniDesktop/.github/blob/main/profile/README.md) 与 [SDK README](https://github.com/UniDesktop/SDK/blob/main/README.md)，核对日期为 2026-09-27。
 
-`/zh-cn/` 与 `/en/` 下的文档来自官方文档仓库 [UniDesktop/unidesktop.github.io](https://github.com/UniDesktop/unidesktop.github.io)（线上站点 <https://unidesktop.github.io/>）。同步时两个语言目录会被整体替换，因此**不要直接手改 `src/content/docs/` 下的正文**。相对上游的差异如下。
+`/zh-cn/` 与 `/en/` 下的文档来自官方文档仓库 [UniDesktop/unidesktop.github.io](https://github.com/UniDesktop/unidesktop.github.io)（线上站点 <https://unidesktop.github.io/>）。
 
-同步时自动完成的改写：
+## 文档同步
 
-- 中文文档的站内绝对链接补上 `/zh-cn` 前缀——官方站的中文是根语言，本站中文挂在 `/zh-cn/` 下。
-- 中文文档首页 hero 图片的相对路径按目录深度调整。
+官网**自己托管文档**，而不是外链到文档站——站点服务在 `unidesktop.sr-studio.cn`，把读者送去另一个域名看文档是更差的选择。代价是会漂移，所以有工具来治它：
 
-本地新增（上游没有对应页面，重新同步后需保留）：
+```sh
+node scripts/sync-docs.mjs                 # 拉上游、改写、落地
+node scripts/sync-docs.mjs --check         # 只报告差异，不写文件（有漂移返回 1）
+node scripts/sync-docs.mjs --source DIR    # 用本地已有的上游检出，便于离线调试
+```
 
-- `internals/protocols/index.md`（中英各一份）：协议分区概览。
+`.github/workflows/sync-docs.yml` 每天定时跑一次，也可以在 Actions 页手动触发。有变化时它会**先构建验证**，再开一个 PR——不会直接把未经验证的文档推到 main。上游是公开仓库，克隆不需要任何密钥。
 
-对上游正文的两处删除（上游的内容缺陷是逐字重复，重新同步后需重新应用）：
+**不要直接手改 `src/content/docs/` 下的正文**，那会在下次同步被覆盖。要改正文请改上游仓库，或改 `docs-overrides/`。
 
-- `zh-cn/internals/protocols/statusnotifieritem.md`：`## 注册顺序` 整节重复出现两次，删除第二份。
-- `en/guides/troubleshooting.md`：`## Diagnostics CLI` 整节重复出现两次，删除第二份。
+脚本按顺序做这几件事：
+
+1. 读上游的 `src/content/docs`
+2. 中文（上游的根语言）→ `src/content/docs/zh-cn`；英文（上游 `/en`）→ `src/content/docs/en`
+3. 改写站内绝对链接：上游中文在根，官网中文在 `/zh-cn` 下，所以 `](/guides/x/)` 要变成 `](/zh-cn/guides/x/)`
+4. 覆盖 `docs-overrides/`（上游没有、官网自己加的页面）
+5. 重新应用去重修正（上游逐字重复的整节）
+6. 把上游 commit 记进 `src/content/docs/.sync-state.json`
+
+第 4、5 步是幂等的，而且会自愈：上游一旦修好重复，规则就不再匹配。
+
+### 相对上游的差异一览
+
+自动改写：
+
+- 中文文档的站内绝对链接补 `/zh-cn` 前缀
+- 中文文档首页 hero 图片的相对路径按目录深度调整
+
+本地新增（存放在 `docs-overrides/`，同步不会冲掉）：
+
+- `internals/protocols/index.md`（中英各一份）：协议分区概览
+
+去重修正（上游是逐字重复，脚本每次会重新应用）：
+
+- `zh-cn/internals/protocols/statusnotifieritem.md`：`## 注册顺序` 整节重复两次，删第二份
+- `en/guides/troubleshooting.md`：`## Diagnostics CLI` 整节重复两次，删第二份
 
 已知上游问题，本站未改动：
 
 - `zh-cn/internals/protocols/dbusmenu.md` 与 `notifyicon.md` 存在近似重复——同一接口表、同一图标来源表各出现两次。属改稿范围，建议在上游修正。
 - 中文 internals 分区的章节比英文版更多，两侧并非严格逐页对等。
 
-另外，`astro.config.mjs` 里的"内部实现"分区是显式列出条目的（Starlight 的 autogenerate 会用目录名当分组标签，中文站点会因此显示 `protocols`），所以上游若新增 internals 页面，需要同步在侧边栏配置里补一条。
+### 侧边栏要手工跟一次
+
+`astro.config.mjs` 里的"内部实现"分区是**显式列出条目**的（Starlight 的 autogenerate 会用目录名当分组标签，中文站点会因此显示 `protocols`）。所以上游若新增 internals 页面，同步脚本会把文件拉下来，但**侧边栏不会自动出现**——需要在那份配置里补一条。其余三个分区是 autogenerate，不受影响。
 
 已实现能力与路线图分开标注；无公开预编译 Release 时提供源码 ZIP 与构建指引。后续发布安装包时，请同步更新首页与入门文档。官网不在浏览器内执行 SDK 示例。
 

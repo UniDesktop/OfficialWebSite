@@ -1,3 +1,13 @@
+/* Declared once here and imported by both stylesheets — the homepage bundle and
+ * the documentation bundle — instead of duplicating it per stylesheet. */
+@font-face {
+  font-family: 'Space Grotesk';
+  src: url('/fonts/space-grotesk.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   color-scheme: light;
   --color-paper: #e7ebf0;

@@ -18,6 +18,11 @@ export default defineConfig({
 		starlight({
 			title: 'UniDesktop',
 			favicon: '/unidesktop-logo.png',
+			// The docs render on the same Cobalt tokens as the homepage instead of
+			// Starlight's stock theme, so the two halves of the site read as one
+			// product. The bridge maps Starlight's semantic variables by role —
+			// see the comment at the top of the file for the inverted naming trap.
+			customCss: ['./src/styles/starlight-theme.css'],
 			logo: {
 				src: './public/unidesktop-logo.png',
 			},

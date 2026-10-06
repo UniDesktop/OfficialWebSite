@@ -6,7 +6,6 @@
  * motion: arch-trace · cascade-probe · tab-crossfade — three primitives, all one-shot,
  *         all guarded by prefers-reduced-motion: no-preference */
 @import '../../tokens.css';
-@font-face { font-family: 'Space Grotesk'; src: url('/fonts/space-grotesk.ttf') format('truetype'); font-weight: 600; font-style: normal; font-display: swap; }
 
 * { box-sizing: border-box; }
 html { overflow-x: clip; scroll-behavior: smooth; scroll-padding-top: 96px; }

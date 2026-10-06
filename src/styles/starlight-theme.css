@@ -1,0 +1,101 @@
+/* Starlight theme bridge.
+ *
+ * The documentation pages were rendering in Starlight's stock theme while the
+ * homepage used the Cobalt tokens, so the two halves of the same site looked
+ * like two different products. This file maps Starlight's semantic variables
+ * onto the shared tokens instead of restyling Starlight component by component,
+ * which keeps the mapping small and survives Starlight upgrades.
+ *
+ * Note Starlight's inverted naming: in the LIGHT theme `--sl-color-white` is the
+ * TEXT colour and `--sl-color-black` is the BACKGROUND. That is the opposite of
+ * what the names suggest, so every value below is mapped by role, not by name.
+ */
+@import '../../tokens.css';
+
+:root {
+  --sl-font: var(--font-body);
+  --sl-font-system: var(--font-body);
+  --sl-font-mono: var(--font-mono);
+  --sl-font-system-mono: var(--font-mono);
+}
+
+/* ---- Light ------------------------------------------------------------------
+ * Chrome (top nav, sidebar) takes the page grey; the reading surface stays
+ * near-white. That is the same two-surface language the homepage uses, where
+ * cards sit on a grey page rather than the whole thing reading as one white
+ * field. */
+:root[data-theme='light'] {
+  --sl-color-white: var(--color-ink);
+  --sl-color-gray-1: var(--color-ink);
+  --sl-color-gray-2: var(--color-body);
+  --sl-color-gray-3: var(--color-body);
+  --sl-color-gray-4: var(--color-muted);
+  --sl-color-gray-5: var(--color-rule);
+  --sl-color-gray-6: var(--color-tint);
+  --sl-color-gray-7: var(--color-paper);
+  --sl-color-black: var(--color-surface-raised);
+
+  --sl-color-accent-high: var(--color-accent-hover);
+  --sl-color-accent: var(--color-accent);
+  --sl-color-accent-low: var(--color-tint);
+
+  --sl-color-text: var(--color-body);
+  --sl-color-text-accent: var(--color-accent);
+  --sl-color-text-invert: var(--color-accent-ink);
+  --sl-color-bg: var(--color-surface-raised);
+  --sl-color-bg-nav: var(--color-paper);
+  --sl-color-bg-sidebar: var(--color-paper);
+  --sl-color-bg-inline-code: var(--color-tint);
+  --sl-color-bg-accent: var(--color-accent);
+  --sl-color-hairline: var(--color-rule);
+  --sl-color-hairline-light: var(--color-rule);
+  --sl-color-hairline-shade: var(--color-rule);
+}
+
+/* ---- Dark -------------------------------------------------------------------
+ * Starlight keeps its dark values on a bare `:root`; the attribute selector here
+ * is what lets these win without an !important. */
+:root[data-theme='dark'] {
+  --sl-color-black: var(--color-paper);
+  --sl-color-gray-7: var(--color-paper);
+  --sl-color-gray-6: var(--color-surface);
+  --sl-color-gray-5: var(--color-rule);
+  --sl-color-gray-4: var(--color-muted);
+  --sl-color-gray-3: var(--color-body);
+  --sl-color-gray-2: var(--color-body);
+  --sl-color-gray-1: var(--color-ink);
+  --sl-color-white: var(--color-ink);
+
+  --sl-color-accent-high: var(--color-accent-hover);
+  --sl-color-accent: var(--color-accent);
+  --sl-color-accent-low: var(--color-tint);
+
+  --sl-color-text: var(--color-body);
+  --sl-color-text-accent: var(--color-accent);
+  --sl-color-text-invert: var(--color-accent-ink);
+  --sl-color-bg: var(--color-surface-raised);
+  --sl-color-bg-nav: var(--color-paper);
+  --sl-color-bg-sidebar: var(--color-paper);
+  --sl-color-bg-inline-code: var(--color-surface);
+  --sl-color-bg-accent: var(--color-accent);
+  --sl-color-hairline: var(--color-rule);
+  --sl-color-hairline-light: var(--color-rule);
+  --sl-color-hairline-shade: var(--color-rule);
+}
+
+/* ---- Type -------------------------------------------------------------------
+ * The homepage sets headings in Space Grotesk with the system CJK face behind
+ * it; the docs do the same. Body copy stays on the system stack, as it does on
+ * the homepage. */
+.sl-markdown-content :is(h1, h2, h3, h4, h5, h6),
+.site-title,
+#starlight__sidebar .top-level > li > a,
+#starlight__sidebar .group-label > span {
+  font-family: var(--font-display);
+  font-style: normal;
+  letter-spacing: -0.01em;
+}
+
+/* Starlight italicises nothing by default, but a future theme or an author's
+ * markdown could; headings stay roman across the whole documentation. */
+.sl-markdown-content :is(h1, h2, h3, h4, h5, h6) { font-style: normal; }
